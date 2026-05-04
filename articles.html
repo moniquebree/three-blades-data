@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles — Three Blades Data</title>
+  <meta name="description" content="Articles on Power BI, data analytics, business automation, and the Microsoft data platform.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="three-blades-data/css/style.css">
+  <link rel="icon" type="image/jpeg" href="three-blades-data/images/logo.jpg">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <img src="three-blades-data/images/logo.jpg" alt="Three Blades Data logo">
+        <span>Three Blades Data</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="three-blades-data/index.html#services">services</a></li>
+        <li><a href="three-blades-data/index.html#about">about</a></li>
+        <li><a href="three-blades-data/index.html#contact">contact</a></li>
+        <li><a href="articles.html" class="active">articles</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <span class="mono green">articles</span>
+      <h1 style="margin-top: 0.75rem;">Writing about data, tools, and making things work.</h1>
+      <p>Practical thinking from the front lines of small business analytics.</p>
+    </div>
+  </div>
+
+  <!-- Articles List -->
+  <div class="articles-list">
+    <div class="container">
+
+      <!--
+        HOW TO ADD A NEW ARTICLE:
+
+        1. Duplicate posts/template.html and rename it
+           (e.g. posts/your-article-slug.html)
+
+        2. Edit the new file — change the title, date, and body text
+
+        3. Copy one of the article-item blocks below, paste it
+           at the TOP of this list (newest first), and update
+           the href, date, title, and excerpt
+
+        That's it. Save, commit, push.
+      -->
+
+      <!-- EXAMPLE — uncomment and edit when you have a real article:
+      <a href="posts/your-article-slug.html" class="article-item">
+        <span class="article-date">20 May 2026</span>
+        <h3>Your Article Title Goes Here</h3>
+        <p class="article-excerpt">
+          A one or two sentence summary of what this article covers.
+        </p>
+      </a>
+      -->
+
+      <div class="articles-empty">
+        <p>Articles coming soon. Watch this space.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <img src="three-blades-data/images/logo.jpg" alt="Three Blades Data" class="footer-logo">
+        <div class="footer-details">
+          <a href="mailto:monique@threebladesdata.com">monique@threebladesdata.com</a><br>
+          +61 431 798 483<br>
+          ABN 61 818 594 485<br>
+          Mid North Coast, NSW Australia
+        </div>
+      </div>
+      <div class="footer-copy">
+        &copy; 2026 Three Blades Data. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
