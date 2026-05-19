@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.Kuro" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#d98c4a</item>
+        <item name="colorOnPrimary">#0a0a0d</item>
+        <item name="android:windowBackground">#0a0a0d</item>
+        <item name="android:statusBarColor">#0a0a0d</item>
+    </style>
+</resources>

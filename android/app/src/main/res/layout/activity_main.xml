@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="#0a0a0d">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="KURO  —  milestone 2"
+        android:textColor="#e8e4d8"
+        android:textSize="18sp"
+        android:letterSpacing="0.25"
+        android:layout_marginBottom="40dp"/>
+
+    <Button
+        android:id="@+id/btnTestSingle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test — single speak in 60s"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnTestNag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test — nag chain (firm)"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnAck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="I heard you — stop nagging"
+        android:padding="16dp"/>
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#8a8a98"
+        android:textSize="14sp"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:text="Ready. Pick a test above."/>
+</LinearLayout>
