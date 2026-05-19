@@ -31,9 +31,39 @@ class KuroSpeakService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        pendingLine = intent?.getStringExtra(MainActivity.EXTRA_LINE) ?: "Reminder."
+        if (!ReminderState.isActive(this) || ReminderState.isAcknowledged(this)) {
+            ReminderState.clear(this)
+            stopSelfSafely()
+            return START_NOT_STICKY
+        }
+
+        val label = ReminderState.label(this)
+        val nagCount = ReminderState.nagCount(this)
+        val persistence = ReminderState.persistence(this)
+        val maxNags = ReminderState.maxNagsFor(persistence)
+
+        pendingLine = lineFor(label, nagCount, persistence)
+
+        if (nagCount < maxNags) {
+            ReminderState.incrementNag(this)
+            AlarmScheduler.scheduleAt(this, System.currentTimeMillis() + NAG_INTERVAL_MS)
+        } else {
+            ReminderState.clear(this)
+        }
+
         if (ttsReady) speak()
         return START_NOT_STICKY
+    }
+
+    private fun lineFor(label: String, nagCount: Int, persistence: Int): String {
+        if (persistence == ReminderState.PERSIST_GENTLE) return label
+        return when (nagCount) {
+            0 -> "$label. Tap 'I heard you' or I'll be back."
+            1 -> "Still waiting on $label. Tap the button."
+            2 -> "Not letting this go. $label."
+            3 -> "Last go. $label."
+            else -> "$label. Still."
+        }
     }
 
     private fun mediaAttributes(): AudioAttributes =
@@ -131,5 +161,6 @@ class KuroSpeakService : Service() {
 
     companion object {
         private const val GOOGLE_TTS_PACKAGE = "com.google.android.tts"
+        private const val NAG_INTERVAL_MS = 30_000L
     }
 }

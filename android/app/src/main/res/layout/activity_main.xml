@@ -10,17 +10,33 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="KURO  —  milestone 1"
+        android:text="KURO  —  milestone 2"
         android:textColor="#e8e4d8"
         android:textSize="18sp"
         android:letterSpacing="0.25"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="40dp"/>
 
     <Button
-        android:id="@+id/btnTest"
+        android:id="@+id/btnTestSingle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Test — speak in 60 seconds"
+        android:text="Test — single speak in 60s"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnTestNag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test — nag chain (firm)"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnAck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="I heard you — stop nagging"
         android:padding="16dp"/>
 
     <TextView
@@ -31,5 +47,5 @@
         android:textSize="14sp"
         android:layout_marginTop="32dp"
         android:gravity="center"
-        android:text="Tap, then lock the tablet. Voice should come through with the screen off."/>
+        android:text="Ready. Pick a test above."/>
 </LinearLayout>

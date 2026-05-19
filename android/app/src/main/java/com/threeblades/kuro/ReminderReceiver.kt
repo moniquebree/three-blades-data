@@ -7,10 +7,14 @@ import androidx.core.content.ContextCompat
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val line = intent.getStringExtra(MainActivity.EXTRA_LINE) ?: "Reminder."
-        val serviceIntent = Intent(context, KuroSpeakService::class.java).apply {
-            putExtra(MainActivity.EXTRA_LINE, line)
+        if (!ReminderState.isActive(context)) return
+        if (ReminderState.isAcknowledged(context)) {
+            ReminderState.clear(context)
+            return
         }
-        ContextCompat.startForegroundService(context, serviceIntent)
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, KuroSpeakService::class.java)
+        )
     }
 }

@@ -2,7 +2,6 @@ package com.threeblades.kuro
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,41 +14,78 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var status: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val button = findViewById<Button>(R.id.btnTest)
-        val status = findViewById<TextView>(R.id.status)
+        status = findViewById(R.id.status)
 
         requestNotificationPermissionIfNeeded()
 
-        button.setOnClickListener {
+        findViewById<Button>(R.id.btnTestSingle).setOnClickListener {
             if (!ensureExactAlarmsAllowed()) return@setOnClickListener
-            val triggerAt = System.currentTimeMillis() + 60_000L
-            scheduleSpeak(triggerAt)
-            val fmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(triggerAt))
-            status.text = "Armed. Will speak at $fmt — lock the tablet and put it down."
-            Toast.makeText(this, "Locked-screen test armed.", Toast.LENGTH_SHORT).show()
+            startReminder(
+                label = "Single-speak test — milestone one still works",
+                persistence = ReminderState.PERSIST_GENTLE,
+                delayMs = 60_000L,
+                statusText = "Single speak armed. Speaks in 60s, no nag."
+            )
+        }
+
+        findViewById<Button>(R.id.btnTestNag).setOnClickListener {
+            if (!ensureExactAlarmsAllowed()) return@setOnClickListener
+            startReminder(
+                label = "the test nag",
+                persistence = ReminderState.PERSIST_FIRM,
+                delayMs = 30_000L,
+                statusText = "Nag test armed (firm). Fires in 30s, repeats every 30s — up to 4 times — unless you tap 'I heard you'."
+            )
+        }
+
+        findViewById<Button>(R.id.btnAck).setOnClickListener {
+            if (!ReminderState.isActive(this)) {
+                status.text = "Nothing to acknowledge."
+                return@setOnClickListener
+            }
+            ReminderState.acknowledge(this)
+            AlarmScheduler.cancel(this)
+            ReminderState.clear(this)
+            status.text = "Acknowledged. Kuro will pipe down."
+            Toast.makeText(this, "Acknowledged.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun scheduleSpeak(triggerAtMillis: Long) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, ReminderReceiver::class.java).apply {
-            putExtra(EXTRA_LINE, "This is Kuro. The test worked — you heard me with the screen off.")
+    override fun onResume() {
+        super.onResume()
+        refreshStatus()
+    }
+
+    private fun refreshStatus() {
+        if (!ReminderState.isActive(this)) {
+            status.text = "Ready. Pick a test above."
+            return
         }
-        val pending = PendingIntent.getBroadcast(
-            this, REQ_CODE, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
+        val label = ReminderState.label(this)
+        val nag = ReminderState.nagCount(this)
+        val maxNags = ReminderState.maxNagsFor(ReminderState.persistence(this))
+        status.text = if (maxNags == 0) {
+            "Active: \"$label\" (single speak, no nag)."
+        } else {
+            "Active: \"$label\" — fired $nag of up to ${maxNags + 1} times."
+        }
+    }
+
+    private fun startReminder(label: String, persistence: Int, delayMs: Long, statusText: String) {
+        val id = "r-${System.currentTimeMillis()}"
+        ReminderState.start(this, id, label, persistence)
+        AlarmScheduler.scheduleAt(this, System.currentTimeMillis() + delayMs)
+        status.text = statusText
+        Toast.makeText(this, "Armed. Lock the tablet to test.", Toast.LENGTH_SHORT).show()
     }
 
     private fun ensureExactAlarmsAllowed(): Boolean {
@@ -58,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             if (!am.canScheduleExactAlarms()) {
                 Toast.makeText(
                     this,
-                    "Allow exact alarms for Kuro, then come back and tap test.",
+                    "Allow exact alarms for Kuro, then come back and tap again.",
                     Toast.LENGTH_LONG
                 ).show()
                 startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
@@ -80,10 +116,5 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-    }
-
-    companion object {
-        const val EXTRA_LINE = "line"
-        const val REQ_CODE = 42
     }
 }
