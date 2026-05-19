@@ -16,21 +16,29 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 
 private val Fur = Color(0xFF0D0D12)
-private val FurHighlight = Color(0xFF1D1D28)
-private val InnerEar = Color(0xFF3A2A35)
+private val FurHighlight = Color(0xFF22222E)
+private val FurDeep = Color(0xFF050507)
+private val InnerEar = Color(0xFF4A2A38)
+private val InnerEarBright = Color(0xFF6A3A48)
 private val Muzzle = Color(0xFF1A1820)
-private val EyeWhite = Color(0xFFEFE9D5)
-private val EyeAmber = Color(0xFFD9A85A)
+private val ChestTuft = Color(0xFF1A1A26)
+private val EyeWhite = Color(0xFFF1ECDC)
+private val EyeAmberRim = Color(0xFFE0AF60)
+private val EyeAmberCore = Color(0xFFF4C878)
 private val Pupil = Color(0xFF0A0A0D)
 private val Shine = Color(0xE6FFFFFF)
-private val Whisker = Color(0xFF8A8490)
+private val ShineSoft = Color(0x99FFFFFF)
+private val Whisker = Color(0xFF8E8896)
+private val WhiskerPad = Color(0xFF2F2A34)
 private val Nose = Color(0xFFB89090)
-private val MouthLine = Color(0xFF453D4A)
-private val BrowLine = Color(0xFFBCB8AC)
+private val NoseShadow = Color(0xFF6E5A5A)
+private val MouthLine = Color(0xFF4A4250)
+private val BrowLine = Color(0xFFB8B5A6)
 
 @Composable
 fun KuroCat(
@@ -84,11 +92,27 @@ fun KuroCat(
         label = "pupilDart",
     )
 
+    val earTwitch by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 9000
+                0f at 0
+                0f at 8400
+                -2f at 8600
+                0f at 8800
+                0f at 9000
+            },
+        ),
+        label = "earTwitch",
+    )
+
     Canvas(modifier = modifier) {
         val side = minOf(size.width, size.height)
         val scaleFactor = side / 256f
         scale(scaleFactor, scaleFactor, pivot = Offset(0f, 0f)) {
-            drawKuro(breathe, tailTipDrift, blink, pupilDart)
+            drawKuro(breathe, tailTipDrift, blink, pupilDart, earTwitch)
         }
     }
 }
@@ -98,9 +122,9 @@ private fun DrawScope.drawKuro(
     tailTipDrift: Float,
     blink: Float,
     pupilDart: Float,
+    earTwitch: Float,
 ) {
-    // Tail — wraps from right side around the front-bottom of the feet,
-    // tip curls back up on the left. Tip drifts subtly.
+    // Tail — wraps from right side around the front-bottom of the feet
     drawPath(
         path = Path().apply {
             moveTo(178f, 220f)
@@ -112,10 +136,18 @@ private fun DrawScope.drawKuro(
         },
         color = Fur,
     )
+    // Tail subtle highlight along the upper curve (light from above)
+    drawPath(
+        path = Path().apply {
+            moveTo(180f, 222f)
+            cubicTo(206f, 222f, 218f, 240f, 210f, 248f)
+        },
+        color = FurHighlight,
+        style = Stroke(width = 1.6f),
+    )
 
-    // Body breathes from a base pivot so he subtly inflates upward.
     scale(scaleX = 1.005f * breathe, scaleY = breathe, pivot = Offset(128f, 244f)) {
-        // Slinky pear-shaped body — narrow at shoulders, wider at hips.
+        // Body — slinky pear silhouette
         drawPath(
             path = Path().apply {
                 moveTo(108f, 132f)
@@ -129,19 +161,55 @@ private fun DrawScope.drawKuro(
             color = Fur,
         )
 
-        // Front paw hints — two small ovals where his feet meet the floor.
+        // Body upper-right edge highlight (light direction: upper-right)
+        drawPath(
+            path = Path().apply {
+                moveTo(150f, 134f)
+                cubicTo(172f, 146f, 184f, 176f, 192f, 208f)
+            },
+            color = FurHighlight,
+            style = Stroke(width = 2f),
+        )
+        // Body lower-left deeper shadow
+        drawPath(
+            path = Path().apply {
+                moveTo(72f, 200f)
+                cubicTo(64f, 232f, 76f, 248f, 96f, 250f)
+            },
+            color = FurDeep,
+            style = Stroke(width = 2.4f),
+        )
+
+        // Chest tuft — slightly lighter inner shape suggesting fluffier chest fur
+        drawPath(
+            path = Path().apply {
+                moveTo(116f, 142f)
+                cubicTo(110f, 168f, 112f, 200f, 122f, 220f)
+                cubicTo(132f, 220f, 144f, 200f, 142f, 168f)
+                cubicTo(140f, 150f, 134f, 142f, 128f, 142f)
+                close()
+            },
+            color = ChestTuft,
+        )
+
+        // Front paws with toe separations
         drawOval(
             color = FurHighlight,
-            topLeft = Offset(96f, 240f),
-            size = Size(20f, 12f),
+            topLeft = Offset(94f, 240f),
+            size = Size(22f, 12f),
         )
+        drawLine(FurDeep, Offset(101f, 242f), Offset(101f, 252f), strokeWidth = 1.2f)
+        drawLine(FurDeep, Offset(108f, 242f), Offset(108f, 252f), strokeWidth = 1.2f)
+
         drawOval(
             color = FurHighlight,
             topLeft = Offset(140f, 240f),
-            size = Size(20f, 12f),
+            size = Size(22f, 12f),
         )
+        drawLine(FurDeep, Offset(148f, 242f), Offset(148f, 252f), strokeWidth = 1.2f)
+        drawLine(FurDeep, Offset(155f, 242f), Offset(155f, 252f), strokeWidth = 1.2f)
 
-        // Head — smaller, more angular than before. Slight diamond/almond.
+        // Head
         drawPath(
             path = Path().apply {
                 moveTo(128f, 48f)
@@ -154,26 +222,46 @@ private fun DrawScope.drawKuro(
             color = Fur,
         )
 
-        // Ears — tall, pointed, asymmetric tilt. Left ear is slightly more upright;
-        // right ear leans outward, giving the head a knowing tilt.
+        // Head upper-right highlight
         drawPath(
             path = Path().apply {
-                moveTo(94f, 90f)
-                lineTo(78f, 22f)
-                lineTo(116f, 86f)
-                close()
+                moveTo(128f, 50f)
+                cubicTo(152f, 52f, 166f, 70f, 168f, 92f)
             },
-            color = Fur,
+            color = FurHighlight,
+            style = Stroke(width = 1.8f),
         )
-        drawPath(
-            path = Path().apply {
-                moveTo(96f, 84f)
-                lineTo(86f, 40f)
-                lineTo(108f, 82f)
-                close()
-            },
-            color = InnerEar,
-        )
+
+        // Ears
+        rotate(earTwitch, pivot = Offset(96f, 86f)) {
+            drawPath(
+                path = Path().apply {
+                    moveTo(94f, 90f)
+                    lineTo(78f, 22f)
+                    lineTo(116f, 86f)
+                    close()
+                },
+                color = Fur,
+            )
+            drawPath(
+                path = Path().apply {
+                    moveTo(96f, 84f)
+                    lineTo(86f, 40f)
+                    lineTo(108f, 82f)
+                    close()
+                },
+                color = InnerEar,
+            )
+            drawPath(
+                path = Path().apply {
+                    moveTo(98f, 78f)
+                    lineTo(91f, 52f)
+                    lineTo(104f, 76f)
+                    close()
+                },
+                color = InnerEarBright,
+            )
+        }
 
         drawPath(
             path = Path().apply {
@@ -193,34 +281,56 @@ private fun DrawScope.drawKuro(
             },
             color = InnerEar,
         )
+        drawPath(
+            path = Path().apply {
+                moveTo(158f, 78f)
+                lineTo(169f, 54f)
+                lineTo(152f, 76f)
+                close()
+            },
+            color = InnerEarBright,
+        )
 
-        // Faint muzzle/chin patch — barely visible, just gives the face depth.
+        // Subtle muzzle/chin patch
         drawOval(
             color = Muzzle,
-            topLeft = Offset(108f, 110f),
-            size = Size(40f, 22f),
+            topLeft = Offset(106f, 108f),
+            size = Size(44f, 26f),
         )
 
         // Eyes
         drawEye(Offset(113f, 98f), pupilDart, blink)
         drawEye(Offset(143f, 98f), pupilDart, blink)
 
-        // Brows — single thin raised brow over the right eye only (the smug
-        // "really?" look). Left eye has no brow; that asymmetry is the joke.
-        rotate(-12f, pivot = Offset(143f, 80f)) {
+        // BOTH brows now. Asymmetric heights: left lower and flatter,
+        // right higher and more arched — the raised-eyebrow smirk effect
+        // but with both brows present.
+        rotate(8f, pivot = Offset(113f, 84f)) {
             drawPath(
                 path = Path().apply {
-                    moveTo(130f, 80f)
-                    cubicTo(138f, 76f, 152f, 76f, 158f, 80f)
-                    lineTo(158f, 82.5f)
-                    cubicTo(152f, 78.5f, 138f, 78.5f, 130f, 82.5f)
+                    moveTo(100f, 84f)
+                    cubicTo(106f, 81f, 120f, 81f, 126f, 84f)
+                    lineTo(126f, 86.5f)
+                    cubicTo(120f, 83.5f, 106f, 83.5f, 100f, 86.5f)
+                    close()
+                },
+                color = BrowLine,
+            )
+        }
+        rotate(-14f, pivot = Offset(143f, 78f)) {
+            drawPath(
+                path = Path().apply {
+                    moveTo(130f, 78f)
+                    cubicTo(138f, 74f, 152f, 74f, 158f, 78f)
+                    lineTo(158f, 80.5f)
+                    cubicTo(152f, 76.5f, 138f, 76.5f, 130f, 80.5f)
                     close()
                 },
                 color = BrowLine,
             )
         }
 
-        // Nose — small, neat
+        // Nose
         drawPath(
             path = Path().apply {
                 moveTo(124f, 114f)
@@ -230,9 +340,23 @@ private fun DrawScope.drawKuro(
             },
             color = Nose,
         )
+        // Nose shadow underside
+        drawLine(
+            color = NoseShadow,
+            start = Offset(126f, 118f),
+            end = Offset(130f, 118f),
+            strokeWidth = 1.2f,
+        )
 
-        // Mouth — a closed smirk: short flat line below the nose, with one
-        // corner ticked up slightly. Reads as "mm-hm" not "boo-hoo".
+        // Philtrum (the vertical line from nose to mouth — cat anatomy detail)
+        drawLine(
+            color = MouthLine,
+            start = Offset(128f, 119f),
+            end = Offset(128f, 121f),
+            strokeWidth = 1.4f,
+        )
+
+        // Mouth — closed smirk, one corner ticked up slightly
         drawLine(
             color = MouthLine,
             start = Offset(128f, 121f),
@@ -242,49 +366,71 @@ private fun DrawScope.drawKuro(
         drawLine(
             color = MouthLine,
             start = Offset(128f, 121f),
-            end = Offset(135f, 123f),
+            end = Offset(135f, 122.5f),
             strokeWidth = 2.0f,
         )
 
-        // Whiskers — thin, elegant, asymmetric. Salem-cat whiskers.
-        drawLine(Whisker, Offset(106f, 116f), Offset(72f, 108f), strokeWidth = 1.2f)
-        drawLine(Whisker, Offset(106f, 122f), Offset(70f, 124f), strokeWidth = 1.2f)
-        drawLine(Whisker, Offset(106f, 128f), Offset(76f, 136f), strokeWidth = 1.0f)
-        drawLine(Whisker, Offset(150f, 116f), Offset(184f, 110f), strokeWidth = 1.2f)
-        drawLine(Whisker, Offset(150f, 122f), Offset(186f, 124f), strokeWidth = 1.2f)
-        drawLine(Whisker, Offset(150f, 128f), Offset(180f, 136f), strokeWidth = 1.0f)
+        // Whisker pad dots (where whiskers anatomically grow from)
+        drawCircle(WhiskerPad, 1.0f, Offset(110f, 116f))
+        drawCircle(WhiskerPad, 1.0f, Offset(112f, 120f))
+        drawCircle(WhiskerPad, 1.0f, Offset(109f, 124f))
+        drawCircle(WhiskerPad, 1.0f, Offset(146f, 116f))
+        drawCircle(WhiskerPad, 1.0f, Offset(144f, 120f))
+        drawCircle(WhiskerPad, 1.0f, Offset(147f, 124f))
+
+        // Whiskers — thin, elegant, asymmetric
+        drawLine(Whisker, Offset(106f, 116f), Offset(70f, 106f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(108f, 122f), Offset(68f, 124f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(106f, 128f), Offset(74f, 138f), strokeWidth = 1.0f)
+        drawLine(Whisker, Offset(150f, 116f), Offset(186f, 108f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(148f, 122f), Offset(188f, 124f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(150f, 128f), Offset(182f, 138f), strokeWidth = 1.0f)
     }
 }
 
 private fun DrawScope.drawEye(center: Offset, pupilDart: Float, blink: Float) {
-    val eyeRx = 12f
-    val eyeRy = 9f
+    val eyeRx = 13f
+    val eyeRy = 10f
 
-    // Almond outer eye (amber tint at the rim — Salem cat eyes)
+    // Outer amber rim
     drawOval(
-        color = EyeAmber,
+        color = EyeAmberRim,
         topLeft = Offset(center.x - eyeRx, center.y - eyeRy),
         size = Size(eyeRx * 2, eyeRy * 2),
     )
 
-    // Inner eye white (smaller — leaves an amber rim)
+    // Inner amber core (slightly brighter, smaller)
     drawOval(
-        color = EyeWhite,
-        topLeft = Offset(center.x - eyeRx + 1.6f, center.y - eyeRy + 1.4f),
-        size = Size((eyeRx - 1.6f) * 2, (eyeRy - 1.4f) * 2),
+        color = EyeAmberCore,
+        topLeft = Offset(center.x - eyeRx + 1.4f, center.y - eyeRy + 1.2f),
+        size = Size((eyeRx - 1.4f) * 2, (eyeRy - 1.2f) * 2),
     )
 
-    // Narrow vertical slit pupil — the iconic cat stare
+    // Eye white inner — small crescent suggesting the white of the eye
+    drawOval(
+        color = EyeWhite,
+        topLeft = Offset(center.x - eyeRx + 3f, center.y - eyeRy + 2.5f),
+        size = Size((eyeRx - 3f) * 2, (eyeRy - 2.5f) * 2),
+    )
+
+    // Narrow vertical slit pupil
     drawOval(
         color = Pupil,
         topLeft = Offset(center.x - 2.6f + pupilDart, center.y - eyeRy - 0.5f),
         size = Size(5.2f, eyeRy * 2 + 1f),
     )
 
+    // Primary catchlight
     drawCircle(
         color = Shine,
-        radius = 2.0f,
-        center = Offset(center.x - 3.5f, center.y - 4f),
+        radius = 2.2f,
+        center = Offset(center.x - 4f, center.y - 4.5f),
+    )
+    // Secondary softer catchlight (smaller, lower)
+    drawCircle(
+        color = ShineSoft,
+        radius = 1.2f,
+        center = Offset(center.x + 1.5f, center.y + 2f),
     )
 
     if (blink > 0f) {
