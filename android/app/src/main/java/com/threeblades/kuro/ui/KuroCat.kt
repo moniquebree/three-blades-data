@@ -21,15 +21,16 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 
 private val Fur = Color(0xFF0D0D12)
+private val FurEdge = Color(0xFF1F1F2A)
 private val InnerEar = Color(0xFF2A2230)
-private val Muzzle = Color(0xFF1A1A22)
-private val EyeWhite = Color(0xFFE8E4D8)
+private val Muzzle = Color(0xFF2A2632)
+private val EyeWhite = Color(0xFFF1ECDC)
 private val Pupil = Color(0xFF0A0A0D)
 private val Shine = Color(0xE6FFFFFF)
-private val Whisker = Color(0xFF4A4450)
+private val Whisker = Color(0xFF7A7480)
 private val Nose = Color(0xFFCAA39A)
 private val MouthLine = Color(0xFF3A3340)
-private val BrowTuft = Color(0xFFC8C5B8)
+private val BrowTuft = Color(0xFFD8D5C8)
 
 @Composable
 fun KuroCat(
@@ -74,8 +75,8 @@ fun KuroCat(
     )
 
     val pupilDart by transition.animateFloat(
-        initialValue = if (speaking) -1.6f else 0f,
-        targetValue = if (speaking) 2.4f else 0f,
+        initialValue = if (speaking) -1.4f else 0f,
+        targetValue = if (speaking) 2.0f else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
@@ -165,69 +166,130 @@ private fun DrawScope.drawKuro(
             color = InnerEar,
         )
 
+        // Scruffy fur tufts between the ears (the "old man bedhead" look)
+        drawPath(
+            path = Path().apply {
+                moveTo(112f, 80f)
+                lineTo(118f, 64f)
+                lineTo(124f, 80f)
+                close()
+            },
+            color = Fur,
+        )
+        drawPath(
+            path = Path().apply {
+                moveTo(126f, 78f)
+                lineTo(132f, 66f)
+                lineTo(138f, 78f)
+                close()
+            },
+            color = Fur,
+        )
+        drawPath(
+            path = Path().apply {
+                moveTo(140f, 80f)
+                lineTo(146f, 70f)
+                lineTo(150f, 80f)
+                close()
+            },
+            color = Fur,
+        )
+
+        // Scruffy cheek fur tufts (asymmetric — one sticks out more)
+        drawPath(
+            path = Path().apply {
+                moveTo(72f, 152f)
+                lineTo(60f, 144f)
+                lineTo(74f, 158f)
+                close()
+            },
+            color = FurEdge,
+        )
+        drawPath(
+            path = Path().apply {
+                moveTo(184f, 156f)
+                lineTo(198f, 158f)
+                lineTo(184f, 164f)
+                close()
+            },
+            color = FurEdge,
+        )
+
+        // Subtle aged grey muzzle patch
         drawOval(
             color = Muzzle,
-            topLeft = Offset(106f, 156f),
-            size = Size(44f, 22f),
+            topLeft = Offset(102f, 154f),
+            size = Size(52f, 26f),
         )
 
         drawEye(Offset(108f, 142f), pupilDart, blink)
         drawEye(Offset(148f, 142f), pupilDart, blink)
 
-        rotate(-14f, pivot = Offset(108f, 122f)) {
-            drawOval(
+        // ANGRY V brows: inner edges down (toward nose), outer edges up.
+        // Left brow tilts clockwise (+); right brow tilts counter-clockwise (-).
+        // Right brow sits slightly higher than left = "raised eyebrow" judgmental asymmetry.
+        rotate(18f, pivot = Offset(108f, 120f)) {
+            drawPath(
+                path = Path().apply {
+                    moveTo(90f, 118f)
+                    lineTo(124f, 121f)
+                    lineTo(124f, 124f)
+                    lineTo(92f, 122f)
+                    close()
+                },
                 color = BrowTuft,
-                topLeft = Offset(92f, 119f),
-                size = Size(28f, 6f),
             )
         }
-        rotate(14f, pivot = Offset(148f, 122f)) {
-            drawOval(
+        rotate(-18f, pivot = Offset(148f, 116f)) {
+            drawPath(
+                path = Path().apply {
+                    moveTo(132f, 117f)
+                    lineTo(166f, 114f)
+                    lineTo(166f, 117f)
+                    lineTo(132f, 120f)
+                    close()
+                },
                 color = BrowTuft,
-                topLeft = Offset(136f, 119f),
-                size = Size(28f, 6f),
             )
         }
 
         drawPath(
             path = Path().apply {
-                moveTo(124f, 162f)
-                lineTo(132f, 162f)
-                lineTo(128f, 168f)
+                moveTo(124f, 164f)
+                lineTo(132f, 164f)
+                lineTo(128f, 170f)
                 close()
             },
             color = Nose,
         )
 
-        drawPath(
-            path = Path().apply {
-                moveTo(128f, 168f)
-                quadraticBezierTo(124f, 176f, 116f, 174f)
-            },
+        // Tight grumpy mouth — short downturned dash, not a sad curve
+        drawLine(
             color = MouthLine,
-            style = Stroke(width = 2f),
+            start = Offset(128f, 170f),
+            end = Offset(122f, 174f),
+            strokeWidth = 2.2f,
         )
-        drawPath(
-            path = Path().apply {
-                moveTo(128f, 168f)
-                quadraticBezierTo(132f, 176f, 140f, 174f)
-            },
+        drawLine(
             color = MouthLine,
-            style = Stroke(width = 2f),
+            start = Offset(128f, 170f),
+            end = Offset(134f, 174f),
+            strokeWidth = 2.2f,
         )
 
-        drawLine(Whisker, Offset(96f, 160f), Offset(58f, 152f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(96f, 168f), Offset(56f, 168f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(96f, 176f), Offset(60f, 186f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(160f, 160f), Offset(198f, 152f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(160f, 168f), Offset(200f, 168f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(160f, 176f), Offset(196f, 186f), strokeWidth = 1.6f)
+        // Whiskers — asymmetric, a bit messy
+        drawLine(Whisker, Offset(96f, 158f), Offset(58f, 148f), strokeWidth = 1.6f)
+        drawLine(Whisker, Offset(96f, 166f), Offset(54f, 168f), strokeWidth = 1.6f)
+        drawLine(Whisker, Offset(96f, 174f), Offset(62f, 184f), strokeWidth = 1.4f)
+        drawLine(Whisker, Offset(160f, 158f), Offset(202f, 152f), strokeWidth = 1.6f)
+        drawLine(Whisker, Offset(160f, 166f), Offset(204f, 168f), strokeWidth = 1.4f)
+        drawLine(Whisker, Offset(160f, 174f), Offset(196f, 188f), strokeWidth = 1.6f)
     }
 }
 
 private fun DrawScope.drawEye(center: Offset, pupilDart: Float, blink: Float) {
-    val eyeRx = 16f
-    val eyeRy = 13f
+    val eyeRx = 15f
+    val eyeRy = 11f
 
     drawOval(
         color = EyeWhite,
@@ -237,29 +299,14 @@ private fun DrawScope.drawEye(center: Offset, pupilDart: Float, blink: Float) {
 
     drawOval(
         color = Pupil,
-        topLeft = Offset(center.x - 5.5f + pupilDart, center.y - eyeRy - 1f),
-        size = Size(11f, eyeRy * 2 + 2f),
+        topLeft = Offset(center.x - 4.5f + pupilDart, center.y - 8.5f),
+        size = Size(9f, 17f),
     )
 
     drawCircle(
         color = Shine,
-        radius = 2.8f,
-        center = Offset(center.x - 4f, center.y - 6f),
-    )
-
-    drawPath(
-        path = Path().apply {
-            moveTo(center.x - eyeRx, center.y - eyeRy + 1f)
-            cubicTo(
-                center.x - eyeRx / 2f, center.y - eyeRy + 7f,
-                center.x + eyeRx / 2f, center.y - eyeRy + 7f,
-                center.x + eyeRx, center.y - eyeRy + 1f,
-            )
-            lineTo(center.x + eyeRx, center.y - eyeRy)
-            lineTo(center.x - eyeRx, center.y - eyeRy)
-            close()
-        },
-        color = Fur,
+        radius = 2.6f,
+        center = Offset(center.x - 3.5f, center.y - 4.5f),
     )
 
     if (blink > 0f) {

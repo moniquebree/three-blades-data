@@ -2,6 +2,12 @@ package com.threeblades.kuro.ui
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -39,8 +49,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.threeblades.kuro.AlarmScheduler
 import com.threeblades.kuro.KuroSpeakService
 import com.threeblades.kuro.ReminderState
-import androidx.compose.material3.Text
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 @Composable
 fun KuroScreen() {
@@ -79,8 +89,22 @@ fun KuroScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Ink)
+            .drawBehind {
+                drawRect(
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color(0xFF20202E),
+                            0.55f to Ink,
+                            1.0f to Ink,
+                        ),
+                        center = Offset(size.width / 2f, size.height * 0.22f),
+                        radius = size.width * 0.85f,
+                    ),
+                )
+            },
     ) {
+        StarField(modifier = Modifier.fillMaxSize())
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -170,6 +194,48 @@ fun KuroScreen() {
 
     if (settingsOpen) {
         SettingsSheet(onDismiss = { settingsOpen = false })
+    }
+}
+
+private data class Star(val x: Float, val y: Float, val phase: Float, val baseAlpha: Float)
+
+@Composable
+private fun StarField(modifier: Modifier) {
+    val transition = rememberInfiniteTransition(label = "starfield")
+    val t by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "tprogress",
+    )
+
+    val stars = remember {
+        val rng = Random(42)
+        List(38) {
+            Star(
+                x = rng.nextFloat(),
+                y = rng.nextFloat() * 0.7f,
+                phase = rng.nextFloat(),
+                baseAlpha = 0.25f + rng.nextFloat() * 0.35f,
+            )
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        val dotRadius = 1.4.dp.toPx()
+        stars.forEach { s ->
+            val phased = (t + s.phase) % 1f
+            val twinkle = if (phased < 0.5f) phased * 2f else (1f - phased) * 2f
+            val alpha = (0.2f + twinkle * 0.55f) * s.baseAlpha
+            drawCircle(
+                color = Color(0xFFE8E4D8).copy(alpha = alpha),
+                radius = dotRadius,
+                center = Offset(s.x * size.width, s.y * size.height),
+            )
+        }
     }
 }
 
