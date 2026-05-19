@@ -212,36 +212,37 @@ private fun DrawScope.drawKuro(
             style = Stroke(width = 2.0f),
         )
 
-        // Ears — sit on TOP of the head, sticking up. Bases anchored to
-        // the upper edge of the head (y ~52-60), apex up at y ~14-16.
-        // Proper cat-ear triangle proportions.
-        rotate(earTwitch, pivot = Offset(98f, 56f)) {
+        // Ears — bases sit ON the head silhouette so they're fully
+        // attached. Outer base point at (92, 50) is right at the head's
+        // upper-left contour. Inner base at (118, 44) is well inside
+        // the head's top. The base "line" rests on the head's top curve.
+        rotate(earTwitch, pivot = Offset(102f, 48f)) {
             drawPath(
                 path = Path().apply {
-                    moveTo(78f, 60f)
-                    lineTo(94f, 22f)
-                    quadraticBezierTo(100f, 14f, 108f, 22f)
-                    lineTo(118f, 52f)
+                    moveTo(92f, 50f)
+                    lineTo(96f, 22f)
+                    quadraticBezierTo(102f, 14f, 108f, 22f)
+                    lineTo(118f, 44f)
                     close()
                 },
                 color = Fur,
             )
             drawPath(
                 path = Path().apply {
-                    moveTo(88f, 56f)
-                    lineTo(98f, 32f)
-                    quadraticBezierTo(102f, 26f, 106f, 32f)
-                    lineTo(114f, 50f)
+                    moveTo(98f, 46f)
+                    lineTo(100f, 30f)
+                    quadraticBezierTo(102f, 24f, 106f, 30f)
+                    lineTo(114f, 42f)
                     close()
                 },
                 color = InnerEarShadow,
             )
             drawPath(
                 path = Path().apply {
-                    moveTo(94f, 50f)
-                    lineTo(100f, 36f)
-                    quadraticBezierTo(102f, 34f, 104f, 36f)
-                    lineTo(108f, 46f)
+                    moveTo(100f, 42f)
+                    lineTo(101f, 34f)
+                    quadraticBezierTo(102f, 32f, 105f, 34f)
+                    lineTo(108f, 40f)
                     close()
                 },
                 color = InnerEar,
@@ -250,30 +251,30 @@ private fun DrawScope.drawKuro(
 
         drawPath(
             path = Path().apply {
-                moveTo(178f, 60f)
-                lineTo(162f, 22f)
-                quadraticBezierTo(156f, 14f, 148f, 22f)
-                lineTo(138f, 52f)
+                moveTo(164f, 50f)
+                lineTo(160f, 22f)
+                quadraticBezierTo(154f, 14f, 148f, 22f)
+                lineTo(138f, 44f)
                 close()
             },
             color = Fur,
         )
         drawPath(
             path = Path().apply {
-                moveTo(168f, 56f)
-                lineTo(158f, 32f)
-                quadraticBezierTo(154f, 26f, 150f, 32f)
-                lineTo(142f, 50f)
+                moveTo(158f, 46f)
+                lineTo(156f, 30f)
+                quadraticBezierTo(154f, 24f, 150f, 30f)
+                lineTo(142f, 42f)
                 close()
             },
             color = InnerEarShadow,
         )
         drawPath(
             path = Path().apply {
-                moveTo(162f, 50f)
-                lineTo(156f, 36f)
-                quadraticBezierTo(154f, 34f, 152f, 36f)
-                lineTo(148f, 46f)
+                moveTo(156f, 42f)
+                lineTo(155f, 34f)
+                quadraticBezierTo(154f, 32f, 151f, 34f)
+                lineTo(148f, 40f)
                 close()
             },
             color = InnerEar,
