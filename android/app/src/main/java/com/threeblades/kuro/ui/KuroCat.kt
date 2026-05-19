@@ -118,29 +118,26 @@ private fun DrawScope.drawKuro(
     pupilDart: Float,
     earTwitch: Float,
 ) {
-    // Tail — long flowing curve from upper-right of body, wrapping out to
-    // the far right, sweeping under the feet, curling up on the left with
-    // the tip flicked slightly inward.
+    // Tail — long graceful curl coming out from behind the body on the right,
+    // sweeping out and down with the tip pointing inward. Clearly a tail.
     drawPath(
         path = Path().apply {
-            moveTo(178f, 192f)
-            cubicTo(218f, 188f, 246f, 214f, 246f, 240f)
-            cubicTo(246f, 262f, 226f, 274f, 198f, 272f)
-            cubicTo(158f, 268f, 100f + tailTipDrift, 270f, 62f + tailTipDrift, 256f)
-            cubicTo(32f + tailTipDrift, 244f, 22f + tailTipDrift, 208f, 50f + tailTipDrift, 188f)
-            cubicTo(74f + tailTipDrift, 174f, 92f + tailTipDrift, 192f, 76f + tailTipDrift, 212f)
-            cubicTo(64f + tailTipDrift, 226f, 76f + tailTipDrift, 248f, 120f, 256f)
-            cubicTo(160f, 260f, 184f, 244f, 192f, 220f)
-            cubicTo(196f, 206f, 188f, 196f, 178f, 192f)
+            moveTo(186f, 198f)
+            cubicTo(218f, 196f, 242f, 214f, 246f, 240f)
+            cubicTo(250f, 264f, 232f + tailTipDrift, 280f, 210f + tailTipDrift, 276f)
+            quadraticBezierTo(198f + tailTipDrift, 273f, 202f + tailTipDrift, 264f)
+            cubicTo(210f, 252f, 224f, 240f, 226f, 222f)
+            cubicTo(226f, 210f, 212f, 202f, 198f, 200f)
+            cubicTo(192f, 199f, 188f, 199f, 186f, 198f)
             close()
         },
         color = Fur,
     )
-    // Tail glossy sheen along the upper curve
+    // Tail glossy sheen along the upper-outer curve
     drawPath(
         path = Path().apply {
-            moveTo(182f, 192f)
-            cubicTo(214f, 190f, 238f, 214f, 240f, 240f)
+            moveTo(190f, 198f)
+            cubicTo(218f, 198f, 240f, 216f, 242f, 240f)
         },
         color = FurSheen,
         style = Stroke(width = 2.2f),
@@ -215,25 +212,25 @@ private fun DrawScope.drawKuro(
             style = Stroke(width = 2.0f),
         )
 
-        // Ears — softly rounded tips. Sides still mostly straight for a
-        // pointy-cat silhouette, just no sharp apex.
-        rotate(earTwitch, pivot = Offset(96f, 86f)) {
+        // Ears — proper cat-ear triangle: wide base, modest height,
+        // softly rounded tip. Aspect roughly base ≈ height.
+        rotate(earTwitch, pivot = Offset(100f, 88f)) {
             drawPath(
                 path = Path().apply {
-                    moveTo(90f, 92f)
-                    lineTo(78f, 32f)
-                    quadraticBezierTo(82f, 18f, 92f, 24f)
-                    lineTo(116f, 84f)
+                    moveTo(80f, 94f)
+                    lineTo(96f, 54f)
+                    quadraticBezierTo(102f, 46f, 110f, 54f)
+                    lineTo(120f, 88f)
                     close()
                 },
                 color = Fur,
             )
             drawPath(
                 path = Path().apply {
-                    moveTo(94f, 84f)
-                    lineTo(86f, 44f)
-                    quadraticBezierTo(88f, 36f, 94f, 40f)
-                    lineTo(108f, 80f)
+                    moveTo(90f, 86f)
+                    lineTo(99f, 64f)
+                    quadraticBezierTo(102f, 58f, 107f, 64f)
+                    lineTo(114f, 82f)
                     close()
                 },
                 color = InnerEarShadow,
@@ -241,9 +238,9 @@ private fun DrawScope.drawKuro(
             drawPath(
                 path = Path().apply {
                     moveTo(95f, 78f)
-                    lineTo(90f, 52f)
-                    quadraticBezierTo(91f, 48f, 96f, 50f)
-                    lineTo(104f, 74f)
+                    lineTo(101f, 68f)
+                    quadraticBezierTo(102f, 66f, 105f, 68f)
+                    lineTo(110f, 76f)
                     close()
                 },
                 color = InnerEar,
@@ -252,20 +249,20 @@ private fun DrawScope.drawKuro(
 
         drawPath(
             path = Path().apply {
-                moveTo(166f, 92f)
-                lineTo(178f, 32f)
-                quadraticBezierTo(174f, 18f, 164f, 24f)
-                lineTo(140f, 84f)
+                moveTo(176f, 94f)
+                lineTo(160f, 54f)
+                quadraticBezierTo(154f, 46f, 146f, 54f)
+                lineTo(136f, 88f)
                 close()
             },
             color = Fur,
         )
         drawPath(
             path = Path().apply {
-                moveTo(162f, 84f)
-                lineTo(170f, 44f)
-                quadraticBezierTo(168f, 36f, 162f, 40f)
-                lineTo(148f, 80f)
+                moveTo(166f, 86f)
+                lineTo(157f, 64f)
+                quadraticBezierTo(154f, 58f, 149f, 64f)
+                lineTo(142f, 82f)
                 close()
             },
             color = InnerEarShadow,
@@ -273,9 +270,9 @@ private fun DrawScope.drawKuro(
         drawPath(
             path = Path().apply {
                 moveTo(161f, 78f)
-                lineTo(166f, 52f)
-                quadraticBezierTo(165f, 48f, 160f, 50f)
-                lineTo(152f, 74f)
+                lineTo(155f, 68f)
+                quadraticBezierTo(154f, 66f, 151f, 68f)
+                lineTo(146f, 76f)
                 close()
             },
             color = InnerEar,
