@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.media.AudioAttributes
-import android.os.Build
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Bundle
 import android.os.PowerManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -19,6 +21,7 @@ class KuroSpeakService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var pendingLine: String? = null
     private var ttsReady = false
+    private var focusRequest: AudioFocusRequest? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -33,16 +36,17 @@ class KuroSpeakService : Service() {
         return START_NOT_STICKY
     }
 
+    private fun mediaAttributes(): AudioAttributes =
+        AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .build()
+
     private fun initTts() {
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts?.language = Locale("en", "AU")
-                tts?.setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ASSISTANT)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .build()
-                )
+                tts?.setAudioAttributes(mediaAttributes())
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
                     override fun onDone(utteranceId: String?) = stopSelfSafely()
@@ -57,19 +61,37 @@ class KuroSpeakService : Service() {
         }
     }
 
+    private fun requestMediaFocus() {
+        val am = getSystemService(AUDIO_SERVICE) as AudioManager
+        val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(mediaAttributes())
+            .build()
+        focusRequest = req
+        am.requestAudioFocus(req)
+    }
+
+    private fun releaseMediaFocus() {
+        val am = getSystemService(AUDIO_SERVICE) as AudioManager
+        focusRequest?.let { am.abandonAudioFocusRequest(it) }
+        focusRequest = null
+    }
+
     private fun speak() {
         val line = pendingLine ?: return
-        tts?.speak(line, TextToSpeech.QUEUE_FLUSH, null, "kuro-${System.currentTimeMillis()}")
+        requestMediaFocus()
+        val params = Bundle().apply {
+            putString(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC.toString())
+            putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+        }
+        tts?.speak(line, TextToSpeech.QUEUE_FLUSH, params, "kuro-${System.currentTimeMillis()}")
     }
 
     private fun startForegroundNow() {
         val channelId = "kuro_speak"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = getSystemService(NotificationManager::class.java)
-            nm.createNotificationChannel(
-                NotificationChannel(channelId, "Kuro speaking", NotificationManager.IMPORTANCE_LOW)
-            )
-        }
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.createNotificationChannel(
+            NotificationChannel(channelId, "Kuro speaking", NotificationManager.IMPORTANCE_LOW)
+        )
         val n: Notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Kuro")
             .setContentText("Speaking a reminder…")
@@ -88,6 +110,7 @@ class KuroSpeakService : Service() {
     }
 
     private fun stopSelfSafely() {
+        try { releaseMediaFocus() } catch (_: Throwable) {}
         try { wakeLock?.takeIf { it.isHeld }?.release() } catch (_: Throwable) {}
         try { tts?.stop(); tts?.shutdown() } catch (_: Throwable) {}
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -95,6 +118,7 @@ class KuroSpeakService : Service() {
     }
 
     override fun onDestroy() {
+        try { releaseMediaFocus() } catch (_: Throwable) {}
         try { wakeLock?.takeIf { it.isHeld }?.release() } catch (_: Throwable) {}
         try { tts?.stop(); tts?.shutdown() } catch (_: Throwable) {}
         super.onDestroy()
