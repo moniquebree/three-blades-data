@@ -16,21 +16,21 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 
 private val Fur = Color(0xFF0D0D12)
-private val FurEdge = Color(0xFF1F1F2A)
-private val InnerEar = Color(0xFF2A2230)
-private val Muzzle = Color(0xFF2A2632)
-private val EyeWhite = Color(0xFFF1ECDC)
+private val FurHighlight = Color(0xFF1D1D28)
+private val InnerEar = Color(0xFF3A2A35)
+private val Muzzle = Color(0xFF1A1820)
+private val EyeWhite = Color(0xFFEFE9D5)
+private val EyeAmber = Color(0xFFD9A85A)
 private val Pupil = Color(0xFF0A0A0D)
 private val Shine = Color(0xE6FFFFFF)
-private val Whisker = Color(0xFF7A7480)
-private val Nose = Color(0xFFCAA39A)
-private val MouthLine = Color(0xFF3A3340)
-private val BrowTuft = Color(0xFFD8D5C8)
+private val Whisker = Color(0xFF8A8490)
+private val Nose = Color(0xFFB89090)
+private val MouthLine = Color(0xFF453D4A)
+private val BrowLine = Color(0xFFBCB8AC)
 
 @Composable
 fun KuroCat(
@@ -41,7 +41,7 @@ fun KuroCat(
 
     val breathe by transition.animateFloat(
         initialValue = 1.0f,
-        targetValue = 1.018f,
+        targetValue = 1.022f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 4600, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
@@ -49,11 +49,11 @@ fun KuroCat(
         label = "breathe",
     )
 
-    val tailRot by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = -9f,
+    val tailTipDrift by transition.animateFloat(
+        initialValue = -3f,
+        targetValue = 3f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 5200, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 5600, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "tail",
@@ -64,21 +64,21 @@ fun KuroCat(
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
-                durationMillis = 6400
+                durationMillis = 7000
                 0f at 0
-                0f at 6000
-                1f at 6200
-                0f at 6400
+                0f at 6600
+                1f at 6800
+                0f at 7000
             },
         ),
         label = "blink",
     )
 
     val pupilDart by transition.animateFloat(
-        initialValue = if (speaking) -1.4f else 0f,
-        targetValue = if (speaking) 2.0f else 0f,
+        initialValue = if (speaking) -1.2f else 0f,
+        targetValue = if (speaking) 1.8f else 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "pupilDart",
@@ -88,60 +88,88 @@ fun KuroCat(
         val side = minOf(size.width, size.height)
         val scaleFactor = side / 256f
         scale(scaleFactor, scaleFactor, pivot = Offset(0f, 0f)) {
-            drawKuro(breathe, tailRot, blink, pupilDart)
+            drawKuro(breathe, tailTipDrift, blink, pupilDart)
         }
     }
 }
 
 private fun DrawScope.drawKuro(
     breathe: Float,
-    tailRot: Float,
+    tailTipDrift: Float,
     blink: Float,
     pupilDart: Float,
 ) {
-    rotate(tailRot, pivot = Offset(188f, 196f)) {
+    // Tail — wraps from right side around the front-bottom of the feet,
+    // tip curls back up on the left. Tip drifts subtly.
+    drawPath(
+        path = Path().apply {
+            moveTo(178f, 220f)
+            cubicTo(212f, 218f, 224f, 244f, 198f, 252f)
+            cubicTo(170f, 258f, 124f, 256f, 96f + tailTipDrift, 246f)
+            cubicTo(78f + tailTipDrift, 240f, 84f + tailTipDrift, 222f, 104f + tailTipDrift, 226f)
+            cubicTo(132f, 234f, 158f, 232f, 178f, 224f)
+            close()
+        },
+        color = Fur,
+    )
+
+    // Body breathes from a base pivot so he subtly inflates upward.
+    scale(scaleX = 1.005f * breathe, scaleY = breathe, pivot = Offset(128f, 244f)) {
+        // Slinky pear-shaped body — narrow at shoulders, wider at hips.
         drawPath(
             path = Path().apply {
-                moveTo(186f, 198f)
-                cubicTo(224f, 196f, 240f, 158f, 224f, 128f)
-                cubicTo(216f, 150f, 200f, 168f, 182f, 174f)
+                moveTo(108f, 132f)
+                cubicTo(86f, 144f, 74f, 174f, 66f, 208f)
+                cubicTo(58f, 240f, 70f, 250f, 96f, 250f)
+                lineTo(160f, 250f)
+                cubicTo(186f, 250f, 198f, 240f, 190f, 208f)
+                cubicTo(182f, 174f, 170f, 144f, 148f, 132f)
                 close()
             },
             color = Fur,
         )
-    }
 
-    scale(1f, breathe, pivot = Offset(128f, 200f)) {
+        // Front paw hints — two small ovals where his feet meet the floor.
         drawOval(
-            color = Fur,
-            topLeft = Offset(62f, 168f),
-            size = Size(132f, 80f),
+            color = FurHighlight,
+            topLeft = Offset(96f, 240f),
+            size = Size(20f, 12f),
+        )
+        drawOval(
+            color = FurHighlight,
+            topLeft = Offset(140f, 240f),
+            size = Size(20f, 12f),
         )
 
+        // Head — smaller, more angular than before. Slight diamond/almond.
         drawPath(
             path = Path().apply {
-                moveTo(70f, 196f)
-                cubicTo(60f, 120f, 92f, 78f, 128f, 78f)
-                cubicTo(164f, 78f, 196f, 120f, 186f, 196f)
+                moveTo(128f, 48f)
+                cubicTo(98f, 50f, 84f, 70f, 86f, 94f)
+                cubicTo(88f, 116f, 102f, 134f, 128f, 138f)
+                cubicTo(154f, 134f, 168f, 116f, 170f, 94f)
+                cubicTo(172f, 70f, 158f, 50f, 128f, 48f)
                 close()
             },
             color = Fur,
         )
 
+        // Ears — tall, pointed, asymmetric tilt. Left ear is slightly more upright;
+        // right ear leans outward, giving the head a knowing tilt.
         drawPath(
             path = Path().apply {
-                moveTo(84f, 96f)
-                cubicTo(70f, 60f, 74f, 44f, 80f, 42f)
-                cubicTo(96f, 52f, 108f, 74f, 112f, 92f)
+                moveTo(94f, 90f)
+                lineTo(78f, 22f)
+                lineTo(116f, 86f)
                 close()
             },
             color = Fur,
         )
         drawPath(
             path = Path().apply {
-                moveTo(88f, 84f)
-                cubicTo(82f, 66f, 84f, 56f, 88f, 54f)
-                cubicTo(96f, 60f, 102f, 72f, 104f, 84f)
+                moveTo(96f, 84f)
+                lineTo(86f, 40f)
+                lineTo(108f, 82f)
                 close()
             },
             color = InnerEar,
@@ -149,164 +177,114 @@ private fun DrawScope.drawKuro(
 
         drawPath(
             path = Path().apply {
-                moveTo(172f, 96f)
-                cubicTo(186f, 60f, 182f, 44f, 176f, 42f)
-                cubicTo(160f, 52f, 148f, 74f, 144f, 92f)
+                moveTo(162f, 90f)
+                lineTo(182f, 24f)
+                lineTo(140f, 86f)
                 close()
             },
             color = Fur,
         )
         drawPath(
             path = Path().apply {
-                moveTo(168f, 84f)
-                cubicTo(174f, 66f, 172f, 56f, 168f, 54f)
-                cubicTo(160f, 60f, 154f, 72f, 152f, 84f)
+                moveTo(160f, 84f)
+                lineTo(174f, 42f)
+                lineTo(148f, 82f)
                 close()
             },
             color = InnerEar,
         )
 
-        // Scruffy fur tufts between the ears (the "old man bedhead" look)
-        drawPath(
-            path = Path().apply {
-                moveTo(112f, 80f)
-                lineTo(118f, 64f)
-                lineTo(124f, 80f)
-                close()
-            },
-            color = Fur,
-        )
-        drawPath(
-            path = Path().apply {
-                moveTo(126f, 78f)
-                lineTo(132f, 66f)
-                lineTo(138f, 78f)
-                close()
-            },
-            color = Fur,
-        )
-        drawPath(
-            path = Path().apply {
-                moveTo(140f, 80f)
-                lineTo(146f, 70f)
-                lineTo(150f, 80f)
-                close()
-            },
-            color = Fur,
-        )
-
-        // Scruffy cheek fur tufts (asymmetric — one sticks out more)
-        drawPath(
-            path = Path().apply {
-                moveTo(72f, 152f)
-                lineTo(60f, 144f)
-                lineTo(74f, 158f)
-                close()
-            },
-            color = FurEdge,
-        )
-        drawPath(
-            path = Path().apply {
-                moveTo(184f, 156f)
-                lineTo(198f, 158f)
-                lineTo(184f, 164f)
-                close()
-            },
-            color = FurEdge,
-        )
-
-        // Subtle aged grey muzzle patch
+        // Faint muzzle/chin patch — barely visible, just gives the face depth.
         drawOval(
             color = Muzzle,
-            topLeft = Offset(102f, 154f),
-            size = Size(52f, 26f),
+            topLeft = Offset(108f, 110f),
+            size = Size(40f, 22f),
         )
 
-        drawEye(Offset(108f, 142f), pupilDart, blink)
-        drawEye(Offset(148f, 142f), pupilDart, blink)
+        // Eyes
+        drawEye(Offset(113f, 98f), pupilDart, blink)
+        drawEye(Offset(143f, 98f), pupilDart, blink)
 
-        // ANGRY V brows: inner edges down (toward nose), outer edges up.
-        // Left brow tilts clockwise (+); right brow tilts counter-clockwise (-).
-        // Right brow sits slightly higher than left = "raised eyebrow" judgmental asymmetry.
-        rotate(18f, pivot = Offset(108f, 120f)) {
+        // Brows — single thin raised brow over the right eye only (the smug
+        // "really?" look). Left eye has no brow; that asymmetry is the joke.
+        rotate(-12f, pivot = Offset(143f, 80f)) {
             drawPath(
                 path = Path().apply {
-                    moveTo(90f, 118f)
-                    lineTo(124f, 121f)
-                    lineTo(124f, 124f)
-                    lineTo(92f, 122f)
+                    moveTo(130f, 80f)
+                    cubicTo(138f, 76f, 152f, 76f, 158f, 80f)
+                    lineTo(158f, 82.5f)
+                    cubicTo(152f, 78.5f, 138f, 78.5f, 130f, 82.5f)
                     close()
                 },
-                color = BrowTuft,
-            )
-        }
-        rotate(-18f, pivot = Offset(148f, 116f)) {
-            drawPath(
-                path = Path().apply {
-                    moveTo(132f, 117f)
-                    lineTo(166f, 114f)
-                    lineTo(166f, 117f)
-                    lineTo(132f, 120f)
-                    close()
-                },
-                color = BrowTuft,
+                color = BrowLine,
             )
         }
 
+        // Nose — small, neat
         drawPath(
             path = Path().apply {
-                moveTo(124f, 164f)
-                lineTo(132f, 164f)
-                lineTo(128f, 170f)
+                moveTo(124f, 114f)
+                lineTo(132f, 114f)
+                lineTo(128f, 119f)
                 close()
             },
             color = Nose,
         )
 
-        // Tight grumpy mouth — short downturned dash, not a sad curve
+        // Mouth — a closed smirk: short flat line below the nose, with one
+        // corner ticked up slightly. Reads as "mm-hm" not "boo-hoo".
         drawLine(
             color = MouthLine,
-            start = Offset(128f, 170f),
-            end = Offset(122f, 174f),
-            strokeWidth = 2.2f,
+            start = Offset(128f, 121f),
+            end = Offset(121f, 124f),
+            strokeWidth = 2.0f,
         )
         drawLine(
             color = MouthLine,
-            start = Offset(128f, 170f),
-            end = Offset(134f, 174f),
-            strokeWidth = 2.2f,
+            start = Offset(128f, 121f),
+            end = Offset(135f, 123f),
+            strokeWidth = 2.0f,
         )
 
-        // Whiskers — asymmetric, a bit messy
-        drawLine(Whisker, Offset(96f, 158f), Offset(58f, 148f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(96f, 166f), Offset(54f, 168f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(96f, 174f), Offset(62f, 184f), strokeWidth = 1.4f)
-        drawLine(Whisker, Offset(160f, 158f), Offset(202f, 152f), strokeWidth = 1.6f)
-        drawLine(Whisker, Offset(160f, 166f), Offset(204f, 168f), strokeWidth = 1.4f)
-        drawLine(Whisker, Offset(160f, 174f), Offset(196f, 188f), strokeWidth = 1.6f)
+        // Whiskers — thin, elegant, asymmetric. Salem-cat whiskers.
+        drawLine(Whisker, Offset(106f, 116f), Offset(72f, 108f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(106f, 122f), Offset(70f, 124f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(106f, 128f), Offset(76f, 136f), strokeWidth = 1.0f)
+        drawLine(Whisker, Offset(150f, 116f), Offset(184f, 110f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(150f, 122f), Offset(186f, 124f), strokeWidth = 1.2f)
+        drawLine(Whisker, Offset(150f, 128f), Offset(180f, 136f), strokeWidth = 1.0f)
     }
 }
 
 private fun DrawScope.drawEye(center: Offset, pupilDart: Float, blink: Float) {
-    val eyeRx = 15f
-    val eyeRy = 11f
+    val eyeRx = 12f
+    val eyeRy = 9f
 
+    // Almond outer eye (amber tint at the rim — Salem cat eyes)
     drawOval(
-        color = EyeWhite,
+        color = EyeAmber,
         topLeft = Offset(center.x - eyeRx, center.y - eyeRy),
         size = Size(eyeRx * 2, eyeRy * 2),
     )
 
+    // Inner eye white (smaller — leaves an amber rim)
+    drawOval(
+        color = EyeWhite,
+        topLeft = Offset(center.x - eyeRx + 1.6f, center.y - eyeRy + 1.4f),
+        size = Size((eyeRx - 1.6f) * 2, (eyeRy - 1.4f) * 2),
+    )
+
+    // Narrow vertical slit pupil — the iconic cat stare
     drawOval(
         color = Pupil,
-        topLeft = Offset(center.x - 4.5f + pupilDart, center.y - 8.5f),
-        size = Size(9f, 17f),
+        topLeft = Offset(center.x - 2.6f + pupilDart, center.y - eyeRy - 0.5f),
+        size = Size(5.2f, eyeRy * 2 + 1f),
     )
 
     drawCircle(
         color = Shine,
-        radius = 2.6f,
-        center = Offset(center.x - 3.5f, center.y - 4.5f),
+        radius = 2.0f,
+        center = Offset(center.x - 3.5f, center.y - 4f),
     )
 
     if (blink > 0f) {
