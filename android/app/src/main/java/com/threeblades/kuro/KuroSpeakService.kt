@@ -31,6 +31,13 @@ class KuroSpeakService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val direct = intent?.getStringExtra(EXTRA_DIRECT_LINE)
+        if (direct != null) {
+            pendingLine = direct
+            if (ttsReady) speak()
+            return START_NOT_STICKY
+        }
+
         if (!ReminderState.isActive(this) || ReminderState.isAcknowledged(this)) {
             ReminderState.clear(this)
             stopSelfSafely()
@@ -162,5 +169,6 @@ class KuroSpeakService : Service() {
     companion object {
         private const val GOOGLE_TTS_PACKAGE = "com.google.android.tts"
         private const val NAG_INTERVAL_MS = 30_000L
+        const val EXTRA_DIRECT_LINE = "direct_line"
     }
 }
