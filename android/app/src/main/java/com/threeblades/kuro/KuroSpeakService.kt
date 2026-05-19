@@ -13,7 +13,6 @@ import android.os.PowerManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import androidx.core.app.NotificationCompat
-import java.util.Locale
 
 class KuroSpeakService : Service() {
 
@@ -22,12 +21,13 @@ class KuroSpeakService : Service() {
     private var pendingLine: String? = null
     private var ttsReady = false
     private var focusRequest: AudioFocusRequest? = null
+    private var triedFallback = false
 
     override fun onCreate() {
         super.onCreate()
         startForegroundNow()
         acquireWakeLock()
-        initTts()
+        initTts(GOOGLE_TTS_PACKAGE)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -42,10 +42,10 @@ class KuroSpeakService : Service() {
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
             .build()
 
-    private fun initTts() {
-        tts = TextToSpeech(this) { status ->
+    private fun initTts(enginePackage: String?) {
+        tts?.shutdown()
+        tts = TextToSpeech(this, { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale("en", "AU")
                 tts?.setAudioAttributes(mediaAttributes())
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
@@ -55,10 +55,13 @@ class KuroSpeakService : Service() {
                 })
                 ttsReady = true
                 if (pendingLine != null) speak()
+            } else if (!triedFallback && enginePackage != null) {
+                triedFallback = true
+                initTts(null)
             } else {
                 stopSelfSafely()
             }
-        }
+        }, enginePackage)
     }
 
     private fun requestMediaFocus() {
@@ -125,4 +128,8 @@ class KuroSpeakService : Service() {
     }
 
     override fun onBind(intent: Intent?) = null
+
+    companion object {
+        private const val GOOGLE_TTS_PACKAGE = "com.google.android.tts"
+    }
 }
